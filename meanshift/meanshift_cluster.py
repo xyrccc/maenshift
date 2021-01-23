@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import math
 import numpy as np
-import matplotlib.pyplot as plt
 
 MIN_DISTANCE = 0.000001  # mini error
 
@@ -12,7 +11,7 @@ def load_data(path, feature_num=2):
             feature_num(int)特征的个数
     output: data(array)特征
     '''
-    f = open('data')  # 打开文件
+    f = open(path)  # 打开文件
     data = []
     for line in f.readlines():
         lines = line.strip().split("\t")
@@ -166,28 +165,37 @@ def save_result(file_name, data):
         f.write("\t".join(tmp) + "\n")
     f.close()
 
+def get_data_sub(file_name,data,sub):
+    '''保存data对应类别
+        input:  file_name(string):存储的文件名
+                data(mat):需要保存的文件
+                sub(mat):需要保存的文件
+        '''
+    f = open(file_name, "w")
+    m, n = np.shape(data)
+    for i in range(m):
+        tmp = []
+        for j in range(n):
+            tmp.append(str(data[i, j]))
+        tmp.append(str(sub[0,i]))
+        f.write("\t".join(tmp) + "\n")
+    f.close()
 
 if __name__ == "__main__":
-    color = ['.r', '.g', '.b', '.y']  # 颜色种类
+    # color = ['.r', '.g', '.b', '.y']  # 颜色种类
     # 导入数据集
     print("----------1.load data ------------")
     data = load_data("data", 2)
-    N = len(data)
     # 训练，h=2
     print("----------2.training ------------")
     points, shift_points, cluster = train_mean_shift(data, 2)
     # 保存所属的类别文件
-
-    # save_result("center_1", shift_points)
-    data = np.array(data)
-    for i in range(N):
-        if cluster[i] == 0:
-            plt.plot(data[i, 0], data[i, 1], 'ro')
-        elif cluster[i] == 1:
-            plt.plot(data[i, 0], data[i, 1], 'go')
-        elif cluster[i] == 2:
-            plt.plot(data[i, 0], data[i, 1], 'bo')
-
-    plt.show()
+    print("----------3.1.save sub ------------")
+    save_result("sub", np.mat(cluster))
+    # 保存聚类中心
+    print("----------3.2.save center ------------")
+    save_result("center", shift_points)
+    #保存对应数据类别
+    get_data_sub("data_sub", np.mat(data), np.mat(cluster))
 
 
